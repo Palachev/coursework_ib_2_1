@@ -1,13 +1,27 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import api from '../api/axios';
+import api, { setUnauthorizedHandler } from '../api/axios';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  const navigate = useNavigate();
   const [token, setToken] = useState(() => localStorage.getItem('token'));
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const onUnauthorized = () => {
+      localStorage.removeItem('token');
+      setToken(null);
+      setUser(null);
+      navigate('/login', { replace: true });
+    };
+
+    setUnauthorizedHandler(onUnauthorized);
+    return () => setUnauthorizedHandler(null);
+  }, [navigate]);
 
   useEffect(() => {
     const restoreSession = async () => {
@@ -50,6 +64,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
+    navigate('/login', { replace: true });
   };
 
   const value = useMemo(
