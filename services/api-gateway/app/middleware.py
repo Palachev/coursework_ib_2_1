@@ -12,6 +12,10 @@ logger = logging.getLogger("gateway")
 
 PUBLIC_PREFIXES = (
     "/health",
+    "/docs",
+    "/openapi.json",
+    "/redoc",
+    "/docs/oauth2-redirect",
     "/auth/login",
     "/auth/register",
 )

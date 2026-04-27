@@ -24,6 +24,10 @@ cp .env.example .env
 docker compose up --build
 ```
 
+Then open:
+- Frontend UI: `http://localhost:5173`
+- API Gateway docs: `http://localhost:8000/docs`
+
 ## Health endpoints
 - Gateway: `GET /health`, `GET /health/downstream`
 - Auth: `GET /health`, `GET /health/db`
