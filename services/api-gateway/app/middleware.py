@@ -12,6 +12,10 @@ logger = logging.getLogger("gateway")
 
 PUBLIC_PREFIXES = (
     "/health",
+    "/docs",
+    "/openapi.json",
+    "/redoc",
+    "/docs/oauth2-redirect",
     "/auth/login",
     "/auth/register",
 )
@@ -28,6 +32,9 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
 class JWTAuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
         if request.url.path.startswith(PUBLIC_PREFIXES):
             return await call_next(request)
 
