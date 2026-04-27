@@ -1,7 +1,7 @@
 :root {
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  color: #121212;
-  background: #f6f7fb;
+  color: #0f172a;
+  background: #f1f5f9;
 }
 
 * {
@@ -10,52 +10,81 @@
 
 body {
   margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #e2e8f0 0%, #f8fafc 40%, #f8fafc 100%);
 }
 
 .container {
-  max-width: 980px;
-  margin: 24px auto;
+  max-width: 1040px;
+  margin: 28px auto;
   padding: 0 16px;
 }
 
 .navbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.86);
+  border-bottom: 1px solid #dbe3f0;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+}
+
+.nav-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 12px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  background: #fff;
-  border-bottom: 1px solid #e3e5eb;
-  padding: 12px 16px;
 }
 
 .links {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
   flex-wrap: wrap;
 }
 
-.links a {
+.nav-link {
   text-decoration: none;
-  color: #2c4be8;
+  color: #334155;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.nav-link:hover {
+  background: #e2e8f0;
+}
+
+.nav-link.active {
+  color: #1d4ed8;
+  background: #dbeafe;
 }
 
 .brand {
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  color: #0f172a;
+  text-decoration: none;
 }
 
 .page {
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
 
 .card {
   display: grid;
   gap: 10px;
-  background: #fff;
-  border: 1px solid #e3e5eb;
-  border-radius: 10px;
-  padding: 14px;
+  background: #ffffff;
+  border: 1px solid #dbe3f0;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
 }
 
 input,
@@ -70,9 +99,19 @@ button {
 
 button {
   cursor: pointer;
-  background: #2c4be8;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: #fff;
-  border-color: #2c4be8;
+  border: 0;
+  font-weight: 600;
+  transition: transform 0.04s ease, filter 0.15s ease;
+}
+
+button:hover {
+  filter: brightness(1.06);
+}
+
+button:active {
+  transform: translateY(1px);
 }
 
 button:disabled {
@@ -90,12 +129,16 @@ button:disabled {
 }
 
 .muted {
-  color: #666;
+  color: #64748b;
+  font-weight: 500;
 }
 
 .danger {
-  background: #cb2d2d;
-  border-color: #cb2d2d;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.secondary {
+  background: #334155;
 }
 
 .list {
@@ -104,7 +147,7 @@ button:disabled {
 }
 
 @media (max-width: 700px) {
-  .navbar {
+  .nav-inner {
     flex-direction: column;
     align-items: flex-start;
   }
