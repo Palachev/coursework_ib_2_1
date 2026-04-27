@@ -1,0 +1,126 @@
+version: "3.9"
+
+services:
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+    container_name: api-gateway
+    env_file:
+      - .env
+    environment:
+      GATEWAY_AUTH_SERVICE_URL: http://auth-service:8000
+      GATEWAY_TASK_SERVICE_URL: http://task-service:8000
+      GATEWAY_NOTIFICATION_SERVICE_URL: http://notification-service:8000
+      GATEWAY_JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    ports:
+      - "8000:8000"
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      task-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+    container_name: auth-service
+    env_file:
+      - .env
+    environment:
+      AUTH_DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@auth-db:5432/auth_db
+      AUTH_JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      AUTH_JWT_EXPIRE_MINUTES: ${AUTH_JWT_EXPIRE_MINUTES:-60}
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/db')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  task-service:
+    build:
+      context: ./services/task-service
+    container_name: task-service
+    env_file:
+      - .env
+    environment:
+      TASK_DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@task-db:5432/task_db
+    depends_on:
+      task-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/db')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  notification-service:
+    build:
+      context: ./services/notification-service
+    container_name: notification-service
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  auth-db:
+    image: postgres:16-alpine
+    container_name: auth-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: auth_db
+    volumes:
+      - auth_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d auth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - backend
+
+  task-db:
+    image: postgres:16-alpine
+    container_name: task-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: task_db
+    volumes:
+      - task_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d task_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - backend
+
+volumes:
+  auth_data:
+  task_data:
+
+networks:
+  backend:
+    driver: bridge
