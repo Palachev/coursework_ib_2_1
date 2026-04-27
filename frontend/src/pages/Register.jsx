@@ -20,7 +20,7 @@ export default function Register() {
       await register(form.email, form.password);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Registration failed');
+      setError(err.response?.data?.detail || 'Не удалось зарегистрироваться');
     } finally {
       setSubmitting(false);
     }
@@ -28,7 +28,7 @@ export default function Register() {
 
   return (
     <div className="page">
-      <h1>Register</h1>
+      <h1 className="page-title">Регистрация</h1>
       <form className="card" onSubmit={onSubmit}>
         <input
           type="email"
@@ -39,7 +39,7 @@ export default function Register() {
         />
         <input
           type="password"
-          placeholder="Password (min 8 chars)"
+          placeholder="Пароль (минимум 8 символов)"
           value={form.password}
           onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
           minLength={8}
@@ -47,11 +47,11 @@ export default function Register() {
         />
         {error && <p className="error">{error}</p>}
         <button type="submit" disabled={submitting}>
-          {submitting ? 'Creating account...' : 'Register'}
+          {submitting ? 'Создаём аккаунт...' : 'Зарегистрироваться'}
         </button>
       </form>
       <p>
-        Already have an account? <Link to="/login">Login</Link>
+        Уже есть аккаунт? <Link to="/login">Войти</Link>
       </p>
     </div>
   );

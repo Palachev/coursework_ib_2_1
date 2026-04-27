@@ -20,7 +20,7 @@ export default function Login() {
       await login(form.email, form.password);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Login failed');
+      setError(err.response?.data?.detail || 'Не удалось выполнить вход');
     } finally {
       setSubmitting(false);
     }
@@ -28,7 +28,7 @@ export default function Login() {
 
   return (
     <div className="page">
-      <h1>Login</h1>
+      <h1 className="page-title">Вход</h1>
       <form className="card" onSubmit={onSubmit}>
         <input
           type="email"
@@ -39,18 +39,18 @@ export default function Login() {
         />
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Пароль"
           value={form.password}
           onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
           required
         />
         {error && <p className="error">{error}</p>}
         <button type="submit" disabled={submitting}>
-          {submitting ? 'Signing in...' : 'Login'}
+          {submitting ? 'Входим...' : 'Войти'}
         </button>
       </form>
       <p>
-        No account? <Link to="/register">Register</Link>
+        Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
       </p>
     </div>
   );

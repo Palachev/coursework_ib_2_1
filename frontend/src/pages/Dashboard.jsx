@@ -8,11 +8,12 @@ export default function Dashboard() {
 
   return (
     <div className="page">
-      <h1>Dashboard</h1>
+      <h1 className="page-title">Панель управления</h1>
       <div className="card">
         <p><strong>Email:</strong> {user?.email}</p>
-        <p><strong>Full name:</strong> {user?.full_name}</p>
-        <p><strong>User ID:</strong> {user?.id}</p>
+        <p><strong>Имя:</strong> {user?.full_name}</p>
+        <p><strong>ID пользователя:</strong> {user?.id}</p>
+        <p className="muted">Используйте меню сверху, чтобы управлять задачами и уведомлениями.</p>
       </div>
       <HealthWidget />
     </div>
@@ -30,7 +31,7 @@ function HealthWidget() {
         const { data } = await api.get('/health');
         if (active) setHealth(data);
       } catch {
-        if (active) setHealth({ status: 'unavailable' });
+        if (active) setHealth({ status: 'недоступно' });
       }
     };
 
@@ -42,7 +43,7 @@ function HealthWidget() {
 
   return (
     <div className="card">
-      <h3>Gateway health</h3>
+      <h3>Состояние API Gateway</h3>
       <pre>{JSON.stringify(health, null, 2)}</pre>
     </div>
   );

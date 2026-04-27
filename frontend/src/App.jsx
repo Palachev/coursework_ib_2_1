@@ -16,7 +16,7 @@ export default function App() {
     return (
       <main className="container">
         <div className="card">
-          <p>Checking authentication...</p>
+          <p>Проверяем авторизацию...</p>
         </div>
       </main>
     );

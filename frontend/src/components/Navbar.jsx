@@ -4,26 +4,26 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
-  const displayName = user?.full_name || user?.email || 'User';
+  const displayName = user?.full_name || user?.email || 'Пользователь';
   const navClass = ({ isActive }) => `nav-link${isActive ? ' active' : ''}`;
 
   return (
     <nav className="navbar">
       <div className="nav-inner">
-        <Link to="/" className="brand">Task Manager</Link>
+        <Link to="/" className="brand">Менеджер задач</Link>
         <div className="links">
           {!isAuthenticated ? (
             <>
-              <NavLink to="/login" className={navClass}>Login</NavLink>
-              <NavLink to="/register" className={navClass}>Register</NavLink>
+              <NavLink to="/login" className={navClass}>Вход</NavLink>
+              <NavLink to="/register" className={navClass}>Регистрация</NavLink>
             </>
           ) : (
             <>
-              <NavLink to="/dashboard" className={navClass}>Dashboard</NavLink>
-              <NavLink to="/tasks" className={navClass}>Tasks</NavLink>
-              <NavLink to="/notifications" className={navClass}>Notifications</NavLink>
-              <span className="muted">Hi, {displayName}</span>
-              <button type="button" className="secondary" onClick={logout}>Logout</button>
+              <NavLink to="/dashboard" className={navClass}>Панель</NavLink>
+              <NavLink to="/tasks" className={navClass}>Задачи</NavLink>
+              <NavLink to="/notifications" className={navClass}>Уведомления</NavLink>
+              <span className="muted">Привет, {displayName}</span>
+              <button type="button" className="secondary" onClick={logout}>Выйти</button>
             </>
           )}
         </div>

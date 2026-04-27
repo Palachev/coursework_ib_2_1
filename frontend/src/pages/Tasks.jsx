@@ -4,6 +4,11 @@ import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
 const emptyTask = { title: '', description: '', status: 'todo' };
+const statusLabels = {
+  todo: 'К выполнению',
+  in_progress: 'В процессе',
+  done: 'Готово',
+};
 
 export default function Tasks() {
   const { user } = useAuth();
@@ -23,7 +28,7 @@ export default function Tasks() {
       const { data } = await api.get('/tasks', { headers });
       setTasks(data);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to load tasks');
+      setError(err.response?.data?.detail || 'Не удалось загрузить задачи');
     } finally {
       setLoading(false);
     }
@@ -54,7 +59,7 @@ export default function Tasks() {
       setTasks((prev) => prev.map((task) => (task.id === tempId ? data : task)));
     } catch (err) {
       setTasks((prev) => prev.filter((task) => task.id !== tempId));
-      setError(err.response?.data?.detail || 'Failed to create task');
+      setError(err.response?.data?.detail || 'Не удалось создать задачу');
     }
   };
 
@@ -69,7 +74,7 @@ export default function Tasks() {
       });
       setEditingTaskId(taskId);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to load task details');
+      setError(err.response?.data?.detail || 'Не удалось загрузить задачу');
     }
   };
 
@@ -92,7 +97,7 @@ export default function Tasks() {
       setTasks((prev) => prev.map((task) => (task.id === taskId ? data : task)));
     } catch (err) {
       setTasks((prev) => prev.map((task) => (task.id === taskId ? previousTask : task)));
-      setError(err.response?.data?.detail || 'Failed to update task');
+      setError(err.response?.data?.detail || 'Не удалось обновить задачу');
     }
   };
 
@@ -104,37 +109,38 @@ export default function Tasks() {
       await api.delete(`/tasks/${taskId}`, { headers });
     } catch (err) {
       setTasks(previousTasks);
-      setError(err.response?.data?.detail || 'Failed to delete task');
+      setError(err.response?.data?.detail || 'Не удалось удалить задачу');
     }
   };
 
   return (
     <div className="page">
-      <h1>Tasks</h1>
+      <h1 className="page-title">Задачи</h1>
       <form className="card" onSubmit={createTask}>
         <input
-          placeholder="Title"
+          placeholder="Название"
           value={form.title}
           onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
           required
         />
         <textarea
-          placeholder="Description"
+          placeholder="Описание"
           value={form.description}
           onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
         />
         <select value={form.status} onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value }))}>
-          <option value="todo">todo</option>
-          <option value="in_progress">in_progress</option>
-          <option value="done">done</option>
+          <option value="todo">К выполнению</option>
+          <option value="in_progress">В процессе</option>
+          <option value="done">Готово</option>
         </select>
-        <button type="submit">Create task</button>
+        <button type="submit">Создать задачу</button>
       </form>
 
       {error && <p className="error">{error}</p>}
-      {loading && <p>Loading tasks...</p>}
+      {loading && <p>Загрузка задач...</p>}
 
       <div className="list">
+        {tasks.length === 0 && !loading && <div className="empty">Пока нет задач. Создайте первую задачу выше.</div>}
         {tasks.map((task) => (
           <div className="card" key={task.id}>
             {editingTaskId === task.id ? (
@@ -142,34 +148,34 @@ export default function Tasks() {
                 <input
                   value={editForm.title}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, title: e.target.value }))}
-                  placeholder="Title"
+                  placeholder="Название"
                 />
                 <textarea
                   value={editForm.description}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
-                  placeholder="Description"
+                  placeholder="Описание"
                 />
                 <select
                   value={editForm.status}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, status: e.target.value }))}
                 >
-                  <option value="todo">todo</option>
-                  <option value="in_progress">in_progress</option>
-                  <option value="done">done</option>
+                  <option value="todo">К выполнению</option>
+                  <option value="in_progress">В процессе</option>
+                  <option value="done">Готово</option>
                 </select>
                 <div className="row">
-                  <button type="button" onClick={() => saveEdit(task.id)}>Save</button>
-                  <button type="button" onClick={cancelEdit}>Cancel</button>
+                  <button type="button" onClick={() => saveEdit(task.id)}>Сохранить</button>
+                  <button type="button" onClick={cancelEdit}>Отмена</button>
                 </div>
               </>
             ) : (
               <>
                 <h3>{task.title}</h3>
                 <p>{task.description}</p>
-                <p>Status: <strong>{task.status}</strong></p>
+                <p>Статус: <strong>{statusLabels[task.status] || task.status}</strong></p>
                 <div className="row">
-                  <button type="button" onClick={() => startEdit(task.id)}>Edit</button>
-                  <button type="button" className="danger" onClick={() => removeTask(task.id)}>Delete</button>
+                  <button type="button" onClick={() => startEdit(task.id)}>Редактировать</button>
+                  <button type="button" className="danger" onClick={() => removeTask(task.id)}>Удалить</button>
                 </div>
               </>
             )}

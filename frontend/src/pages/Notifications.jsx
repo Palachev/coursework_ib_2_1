@@ -15,7 +15,7 @@ export default function Notifications() {
       );
       setNotifications(sorted);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to load notifications');
+      setError(err.response?.data?.detail || 'Не удалось загрузить уведомления');
     }
   };
 
@@ -32,30 +32,31 @@ export default function Notifications() {
       setMessage('');
       await loadNotifications();
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to create notification');
+      setError(err.response?.data?.detail || 'Не удалось создать уведомление');
     }
   };
 
   return (
     <div className="page">
-      <h1>Notifications</h1>
+      <h1 className="page-title">Уведомления</h1>
       <form className="card" onSubmit={createNotification}>
         <input
-          placeholder="Message"
+          placeholder="Текст уведомления"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           required
         />
-        <button type="submit">Create</button>
+        <button type="submit">Создать</button>
       </form>
 
       {error && <p className="error">{error}</p>}
 
       <div className="list">
+        {notifications.length === 0 && <div className="empty">Уведомлений пока нет.</div>}
         {notifications.map((notification) => (
           <div className="card" key={notification.id}>
             <p>{notification.message}</p>
-            <small>{notification.created_at}</small>
+            <small>{new Date(notification.created_at).toLocaleString('ru-RU')}</small>
           </div>
         ))}
       </div>
