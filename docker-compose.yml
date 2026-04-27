@@ -2,54 +2,63 @@ version: "3.9"
 
 services:
   api-gateway:
-    build: ./services/api-gateway
+    build:
+      context: ./services/api-gateway
     container_name: api-gateway
+    env_file:
+      - .env
     ports:
       - "8000:8000"
-    volumes:
-      - ./services/api-gateway:/app
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
-      - auth-service
-      - task-service
-      - notification-service
+      auth-service:
+        condition: service_started
+      task-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
 
   auth-service:
-    build: ./services/auth-service
+    build:
+      context: ./services/auth-service
     container_name: auth-service
+    env_file:
+      - .env
     environment:
       AUTH_DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@auth-db:5432/auth_db
       AUTH_JWT_SECRET_KEY: ${AUTH_JWT_SECRET_KEY:-change-me-in-production}
       AUTH_JWT_EXPIRE_MINUTES: ${AUTH_JWT_EXPIRE_MINUTES:-60}
     ports:
       - "8001:8000"
-    volumes:
-      - ./services/auth-service:/app
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
-      - auth-db
+      auth-db:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
 
   task-service:
-    build: ./services/task-service
+    build:
+      context: ./services/task-service
     container_name: task-service
+    env_file:
+      - .env
     environment:
-      TASK_DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@task-db:5432/task_db
+      TASK_DATABASE_URL: ${TASK_DATABASE_URL:-postgresql+psycopg2://postgres:postgres@task-db:5432/task_db}
     ports:
       - "8002:8000"
-    volumes:
-      - ./services/task-service:/app
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
-      - task-db
+      task-db:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
 
   notification-service:
-    build: ./services/notification-service
+    build:
+      context: ./services/notification-service
     container_name: notification-service
+    env_file:
+      - .env
     ports:
       - "8003:8000"
-    volumes:
-      - ./services/notification-service:/app
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
 
   auth-db:
     image: postgres:16-alpine
@@ -62,6 +71,11 @@ services:
       - "5433:5432"
     volumes:
       - auth_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d auth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   task-db:
     image: postgres:16-alpine
@@ -74,6 +88,11 @@ services:
       - "5434:5432"
     volumes:
       - task_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d task_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   auth_data:
