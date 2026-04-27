@@ -10,7 +10,17 @@ import Register from './pages/Register';
 import Tasks from './pages/Tasks';
 
 export default function App() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <main className="container">
+        <div className="card">
+          <p>Checking authentication...</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <div>

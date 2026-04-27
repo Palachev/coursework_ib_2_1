@@ -10,7 +10,10 @@ export default function Notifications() {
   const loadNotifications = async () => {
     try {
       const { data } = await api.get('/notifications');
-      setNotifications(data);
+      const sorted = [...data].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
+      setNotifications(sorted);
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to load notifications');
     }
@@ -18,6 +21,8 @@ export default function Notifications() {
 
   useEffect(() => {
     loadNotifications();
+    const intervalId = setInterval(loadNotifications, 10_000);
+    return () => clearInterval(intervalId);
   }, []);
 
   const createNotification = async (event) => {

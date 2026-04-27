@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
+  const displayName = user?.full_name || user?.email || 'User';
 
   return (
     <nav className="navbar">
@@ -19,7 +20,7 @@ export default function Navbar() {
             <Link to="/dashboard">Dashboard</Link>
             <Link to="/tasks">Tasks</Link>
             <Link to="/notifications">Notifications</Link>
-            <span className="muted">{user?.email}</span>
+            <span className="muted">Hi, {displayName}</span>
             <button type="button" onClick={logout}>Logout</button>
           </>
         )}
