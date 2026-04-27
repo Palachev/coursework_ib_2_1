@@ -34,7 +34,7 @@ def health() -> dict[str, str]:
 def health_db(db: Session = Depends(get_db)) -> dict[str, str]:
     try:
         db.execute(text("SELECT 1"))
-        return {"service": "task-service", "database": "ok"}
+        return {"service": "task-service", "status": "ok"}
     except SQLAlchemyError:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Database unavailable")
 
