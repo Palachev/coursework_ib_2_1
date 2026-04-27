@@ -1,4 +1,4 @@
-from sqlalchemy import text
+from sqlalchemy import inspect, text
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.exc import SQLAlchemyError
@@ -17,6 +17,20 @@ security = HTTPBearer()
 def on_startup() -> None:
     wait_for_db()
     Base.metadata.create_all(bind=engine)
+    ensure_legacy_schema_compatibility()
+
+
+def ensure_legacy_schema_compatibility() -> None:
+    inspector = inspect(engine)
+    if "users" not in inspector.get_table_names():
+        return
+
+    user_columns = {column["name"] for column in inspector.get_columns("users")}
+    if "full_name" not in user_columns:
+        with engine.begin() as connection:
+            connection.execute(
+                text("ALTER TABLE users ADD COLUMN full_name VARCHAR(255) NOT NULL DEFAULT 'User'")
+            )
 
 
 @app.get("/health")
