@@ -32,6 +32,8 @@ services:
   task-service:
     build: ./services/task-service
     container_name: task-service
+    environment:
+      TASK_DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@task-db:5432/task_db
     ports:
       - "8002:8000"
     volumes:
