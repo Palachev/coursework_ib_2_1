@@ -17,6 +17,10 @@ services:
   auth-service:
     build: ./services/auth-service
     container_name: auth-service
+    environment:
+      AUTH_DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@auth-db:5432/auth_db
+      AUTH_JWT_SECRET_KEY: ${AUTH_JWT_SECRET_KEY:-change-me-in-production}
+      AUTH_JWT_EXPIRE_MINUTES: ${AUTH_JWT_EXPIRE_MINUTES:-60}
     ports:
       - "8001:8000"
     volumes:

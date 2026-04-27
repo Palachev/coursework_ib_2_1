@@ -13,4 +13,9 @@ Simple student-friendly microservices scaffold with separate FastAPI services an
 docker compose up --build
 ```
 
-Each service is mounted for development and has its own Dockerfile and requirements.
+## Auth service features
+- `POST /auth/register` — register a user with `email`, `full_name`, `password`
+- `POST /auth/login` — login and receive a JWT bearer token
+- `GET /auth/me` — get current user via `Authorization: Bearer <token>`
+
+The auth service uses PostgreSQL and creates the `users` table at startup.
