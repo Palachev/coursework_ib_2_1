@@ -1,29 +1,34 @@
 # Microservices Task Manager (FastAPI)
 
-Simple student-friendly microservices project with separate services and Docker orchestration.
+Production-like minimal microservices setup:
+- `api-gateway` (routing, JWT middleware, request logging)
+- `auth-service` (users + JWT + PostgreSQL)
+- `task-service` (task CRUD + PostgreSQL)
+- `notification-service` (simple HTTP notifications)
 
-## Services
-- `api-gateway`
-- `auth-service`
-- `task-service`
-- `notification-service`
+## Architecture improvements
+- API Gateway now proxies HTTP requests to downstream services using service DNS names:
+  - `http://auth-service:8000`
+  - `http://task-service:8000`
+  - `http://notification-service:8000`
+- JWT validation happens at gateway middleware level.
+- Request logging middleware added at gateway.
+- DB services are internal-only (not exposed to host ports).
+- `/health` on all services and `/health/db` on DB-backed services.
+- Compose uses healthchecks + `depends_on: condition: service_healthy`.
+- Shared network `backend` for all containers.
 
-Each service has its own `Dockerfile` inside `services/<service-name>/`.
+## Run
+```bash
+cp .env.example .env
+docker compose up --build
+```
 
-## Run everything with Docker Compose
-1. Copy env file:
-   ```bash
-   cp .env.example .env
-   ```
-2. Build and start all containers:
-   ```bash
-   docker compose up --build
-   ```
+## Health endpoints
+- Gateway: `GET /health`, `GET /health/downstream`
+- Auth: `GET /health`, `GET /health/db`
+- Task: `GET /health`, `GET /health/db`
+- Notification: `GET /health`
 
-## Ports
-- API Gateway: `http://localhost:8000`
-- Auth Service: `http://localhost:8001`
-- Task Service: `http://localhost:8002`
-- Notification Service: `http://localhost:8003`
-- Auth DB: `localhost:5433`
-- Task DB: `localhost:5434`
+## Notification service limitation
+Current notification service is synchronous and in-memory. In production, use an async broker (Redis Streams, RabbitMQ, or Kafka) to decouple task events from notification delivery.

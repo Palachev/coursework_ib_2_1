@@ -1,9 +1,11 @@
 from uuid import UUID
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Response, status
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.database import Base, engine, get_db
+from app.database import Base, engine, get_db, wait_for_db
 from app.models import Task
 from app.schemas import TaskCreateRequest, TaskResponse, TaskUpdateRequest
 
@@ -12,6 +14,7 @@ app = FastAPI(title="Task Service")
 
 @app.on_event("startup")
 def on_startup() -> None:
+    wait_for_db()
     Base.metadata.create_all(bind=engine)
 
 
@@ -25,6 +28,15 @@ def get_current_user_id(x_user_id: str = Header(..., alias="X-User-Id")) -> UUID
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"service": "task-service", "status": "ok"}
+
+
+@app.get("/health/db")
+def health_db(db: Session = Depends(get_db)) -> dict[str, str]:
+    try:
+        db.execute(text("SELECT 1"))
+        return {"service": "task-service", "database": "ok"}
+    except SQLAlchemyError:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Database unavailable")
 
 
 @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)

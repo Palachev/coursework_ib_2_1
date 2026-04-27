@@ -1,8 +1,10 @@
+from sqlalchemy import text
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.database import Base, engine, get_db
+from app.database import Base, engine, get_db, wait_for_db
 from app.models import User
 from app.schemas import LoginRequest, RegisterRequest, TokenResponse, UserResponse
 from app.security import create_access_token, decode_access_token, hash_password, verify_password
@@ -13,12 +15,22 @@ security = HTTPBearer()
 
 @app.on_event("startup")
 def on_startup() -> None:
+    wait_for_db()
     Base.metadata.create_all(bind=engine)
 
 
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"service": "auth-service", "status": "ok"}
+
+
+@app.get("/health/db")
+def health_db(db: Session = Depends(get_db)) -> dict[str, str]:
+    try:
+        db.execute(text("SELECT 1"))
+        return {"service": "auth-service", "database": "ok"}
+    except SQLAlchemyError:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Database unavailable")
 
 
 @app.post("/auth/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
